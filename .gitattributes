@@ -1,0 +1,10 @@
+# Fine riga normalizzati: LF nel repository su ogni piattaforma.
+# Lo sviluppo è su Windows, la CI su Linux: senza questo, i due divergono.
+* text=auto eol=lf
+
+# File binari: mai toccati.
+*.png binary
+*.ico binary
+*.jpg binary
+*.jpeg binary
+*.pdf binary
