@@ -16,3 +16,22 @@ export interface PdfPort {}
 
 /** Fotocamera e compressione immagini. Implementata in adapters/media — Epic 3. */
 export interface MediaPort {}
+
+/** Una sessione autenticata verso Google: token di accesso e sua scadenza (Story 1.3). */
+export interface AuthSession {
+  readonly email: string;
+  readonly token: string;
+  /** Epoch in millisecondi in cui il token scade. */
+  readonly expiresAt: number;
+}
+
+/**
+ * Accesso all'account Google di gestione con scope drive.file (AD-2).
+ * Implementata in adapters/auth; la UI non la usa mai direttamente (AD-7).
+ */
+export interface AuthPort {
+  /** Avvia il flusso di accesso (popup Google). Risolve con la sessione, rigetta se annullato. */
+  connect(): Promise<AuthSession>;
+  /** Tenta il rinnovo silenzioso del token (consenso già dato). Null se serve interazione. */
+  renewSilently(): Promise<AuthSession | null>;
+}

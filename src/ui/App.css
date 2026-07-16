@@ -28,3 +28,24 @@
   color: #b8a690;
   font-size: 0.95rem;
 }
+
+.azione {
+  margin-top: 1rem;
+  padding: 0.7rem 1.4rem;
+  font: inherit;
+  font-size: 1rem;
+  color: #1a1410;
+  background: #e0a44a;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.azione:hover {
+  background: #eab662;
+}
+
+.azione:focus-visible {
+  outline: 3px solid #f3e9dc;
+  outline-offset: 2px;
+}

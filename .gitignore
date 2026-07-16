@@ -4,6 +4,9 @@ dev-dist
 coverage
 *.local
 .DS_Store
+
+# Env con eventuali segreti locali: mai committare.
+# I client ID OAuth sono PUBBLICI e stanno in .env.development/.env.production (tracciati).
 .env
-.env.*
-!.env.example
+.env.local
+.env.*.local

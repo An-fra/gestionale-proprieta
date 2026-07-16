@@ -1,20 +1,43 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 import { App } from './App.tsx';
+import { ConnectionProvider } from './connection-context.tsx';
+import type { Connection } from '../app/connection.ts';
 
-// Smoke test: lo scheletro si monta e renderizza senza errori (Story 1.1, AC-1/AC-4).
+// Connessione finta ferma su "disconnesso": la UI deve mostrare il pulsante di accesso.
+// getState restituisce SEMPRE lo stesso riferimento: useSyncExternalStore esige uno
+// snapshot stabile, altrimenti va in loop di render.
+function fakeConnection(): Connection {
+  const state = { status: 'disconnesso' } as const;
+  return {
+    getState: () => state,
+    subscribe: () => () => {},
+    connect: async () => {},
+    getToken: () => null,
+    ensureToken: async () => null,
+  };
+}
+
+function renderApp() {
+  render(
+    <ConnectionProvider connection={fakeConnection()}>
+      <App />
+    </ConnectionProvider>,
+  );
+}
+
 describe('App', () => {
   it('mostra il titolo dell\'app', () => {
-    render(<App />);
+    renderApp();
     expect(
       screen.getByRole('heading', { name: /Gestionale Proprietà/i }),
     ).toBeInTheDocument();
   });
 
-  it('mostra lo stato di collegamento non ancora configurato', () => {
-    render(<App />);
-    expect(screen.getByRole('status')).toHaveTextContent(
-      /Collegamento non ancora configurato/i,
-    );
+  it('mostra il pulsante di accesso quando disconnesso', () => {
+    renderApp();
+    expect(
+      screen.getByRole('button', { name: /Accedi con Google/i }),
+    ).toBeInTheDocument();
   });
 });

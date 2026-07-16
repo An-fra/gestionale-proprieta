@@ -98,6 +98,92 @@ Non devi mai reinstallare. Quando pubblichi una nuova versione, i dispositivi la
 
 ---
 
-## 4. Account Google di gestione e accesso
+## 4. Account Google di gestione e accesso (Story 1.3)
 
-*(Story 1.3 — non ancora implementato. Questa sezione verrà scritta quando arriveremo lì: creazione dell'account di gestione dedicato, progetto Google Cloud, schermata di consenso OAuth, condivisione in sola lettura per gli account personali.)*
+Questa è la configurazione che collega l'app al tuo Google Drive. Si fa **una volta sola**. Sono tutti clic nell'interfaccia web di Google — nessun codice. Tempo: ~15 minuti.
+
+Alla fine avrai **due "client ID"** (uno per lo sviluppo, uno per l'app online) da consegnare a chi implementa il codice. Il client ID è un identificativo **pubblico**, non una password: condividerlo è sicuro.
+
+### Perché un account dedicato
+
+Questo account Google diventa la "cassaforte" degli affitti: l'app lo usa su tutti i dispositivi e tutti i dati (importi, contratti, documenti) vivono sul **suo** Drive. Tenendolo separato dal tuo account personale, i 15 GB gratuiti sono tutti per gli affitti e la vita digitale privata resta separata.
+
+---
+
+### Passo 1 — Crea l'account Google di gestione
+
+1. In una finestra del browser **in incognito** (per non mischiare con l'account personale), vai su [accounts.google.com/signup](https://accounts.google.com/signup)
+2. Crea un account dedicato, es. `gestione.proprieta.franzoni@gmail.com` (scegli tu il nome)
+3. Annota da qualche parte di sicuro email e password: è l'account che apre la cassaforte
+4. **Da qui in poi, resta loggato con QUESTO account** per tutti i passi successivi
+
+### Passo 2 — Crea il progetto Google Cloud
+
+1. Vai su [console.cloud.google.com](https://console.cloud.google.com) (loggato con l'account di gestione)
+2. Accetta i termini se richiesto (è gratuito, non serve carta di credito per questo uso)
+3. In alto, menu di selezione progetto → **Nuovo progetto**
+4. Nome: `Gestionale Proprietà` → **Crea** → attendi qualche secondo e selezionalo
+
+### Passo 3 — Abilita l'API di Google Drive
+
+1. Menu ☰ → **API e servizi** → **Libreria**
+2. Cerca **Google Drive API** → aprila → **Abilita**
+
+> ⚠️ Senza questo passo, l'app otterrebbe il permesso ma le chiamate a Drive fallirebbero.
+
+### Passo 4 — Configura la schermata di consenso OAuth
+
+*(Nella console recente questa sezione può chiamarsi "Google Auth Platform" o "Branding" — è la stessa cosa.)*
+
+1. Menu ☰ → **API e servizi** → **Schermata consenso OAuth**
+2. Tipo di utente: **Esterno** → **Crea**
+3. Compila i campi obbligatori:
+   - **Nome dell'app**: `Gestionale Proprietà`
+   - **Email di supporto**: l'email dell'account di gestione
+   - **Email di contatto sviluppatore**: la stessa
+   - Il resto lascialo vuoto → **Salva e continua**
+4. **Ambiti (scopes)**: **Aggiungi o rimuovi ambiti** → cerca e spunta **`.../auth/drive.file`** (descrizione: "Vedere, modificare, creare ed eliminare solo i file di Google Drive specifici che usi con questa app") → **Aggiorna** → **Salva e continua**
+5. **Utenti di test**: puoi lasciarlo vuoto → **Salva e continua**
+6. Torna alla panoramica della schermata di consenso e cerca il pulsante **"Pubblica app"** → **Pubblica** → conferma
+
+> 🔑 **Il passo più importante è "Pubblica app".** Se l'app resta in modalità "Test", Google ti farebbe rifare l'accesso **ogni 7 giorni**, per sempre. Pubblicandola "In produzione" questo sparisce. E poiché lo scope `drive.file` è "non sensibile", la pubblicazione **NON richiede alcuna verifica di Google** — è immediata.
+
+### Passo 5 — Crea i due client OAuth
+
+Menu ☰ → **API e servizi** → **Credenziali** → **Crea credenziali** → **ID client OAuth**.
+
+**Client A — Produzione** (l'app online):
+1. Tipo di applicazione: **Applicazione web**
+2. Nome: `Gestionale Proprietà - prod`
+3. **Origini JavaScript autorizzate** → Aggiungi URI: **`https://an-fra.github.io`**
+   - ⚠️ Solo l'origine, **senza** `/gestionale-proprieta/` alla fine. Solo `https://an-fra.github.io`.
+4. **Crea** → copia il **client ID** che appare (finisce con `.apps.googleusercontent.com`)
+
+**Client B — Sviluppo** (per provare in locale). Ripeti "Crea credenziali → ID client OAuth":
+1. Tipo: **Applicazione web**
+2. Nome: `Gestionale Proprietà - dev`
+3. **Origini JavaScript autorizzate** → Aggiungi URI: **`http://localhost:5173`**
+4. **Crea** → copia il secondo **client ID**
+
+> Se Google mostra anche un "client secret": **ignoralo, non serve** per un'app web come questa e non va mai condiviso né committato.
+
+### Passo 6 — Consegna i due client ID
+
+Copia i due client ID e passali a chi implementa. Hanno questo aspetto:
+```
+prod: 123456789-abcdef.apps.googleusercontent.com
+dev:  987654321-ghijkl.apps.googleusercontent.com
+```
+Sono pubblici: la sicurezza sta nelle origini autorizzate (Passo 5), non nella segretezza del client ID.
+
+---
+
+### Passo 7 — Condivisione in sola lettura (facoltativo, per la famiglia)
+
+*(Si può fare ora o più avanti.)* Quando l'app avrà creato le cartelle su Drive (Story 1.4), potrai condividere la cartella `Gestionale Proprietà` **in sola lettura** con i tuoi account personali e quelli di famiglia: così chiunque può *vedere* l'archivio da Drive anche senza l'app (trasparenza e sicurezza a lungo termine), senza poter modificare nulla.
+
+---
+
+### Cosa succede dopo
+
+Con i due client ID, chi implementa scrive l'adapter di autenticazione, e al primo avvio l'app ti chiederà di accedere con l'account di gestione, mostrando **solo** il permesso `drive.file` ("file che usi con questa app") — non l'accesso a tutto il tuo Drive.
