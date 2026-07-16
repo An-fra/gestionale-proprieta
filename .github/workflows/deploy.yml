@@ -49,10 +49,11 @@ jobs:
         run: npm run build
 
       - name: Configura Pages
+        # Pages è già attivato (sorgente "GitHub Actions") tramite API con un token
+        # utente: il GITHUB_TOKEN del workflow non ha il permesso di crearlo da zero
+        # (errore "Resource not accessible by integration"). Qui serve solo a leggere
+        # la configurazione del sito, non a crearlo.
         uses: actions/configure-pages@v6
-        with:
-          # Attiva Pages alla prima esecuzione senza toccare le impostazioni del repo.
-          enablement: true
 
       - name: Carica artefatto
         uses: actions/upload-pages-artifact@v4
