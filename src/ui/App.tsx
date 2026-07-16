@@ -6,7 +6,7 @@ export function App() {
     <main className="app-shell">
       <h1>Gestionale Proprietà</h1>
       <p className="tagline">
-        I conti dei tuoi affitti, sul tuo Google Drive. Sempre con te.
+        I conti dei tuoi affitti, sul tuo Google Drive.
       </p>
       <p className="stato" role="status">
         Collegamento non ancora configurato — arriverà con l'accesso all'account
